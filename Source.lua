@@ -1,8 +1,8 @@
--- Blox Fruits Sea 1 Script - Auto Shop, Auto Unlock Abilities, Auto Farm Leveling, and Full Automation
+-- Blox Fruits Sea 1 Script - Updated NANO HUB
 -- Green and Black Themed Menu (Inspired by Redz Hub)
 
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = library.CreateLib("Blox Fruits Sea 1 - NANO HUB", "GrapeTheme")
+local Window = library.CreateLib("BLOX FRUITS SEA 1 - PICA HUB", "GrapeTheme")
 
 -- Variables
 local player = game.Players.LocalPlayer
@@ -22,44 +22,50 @@ local function buyFragmentItem(npcPath, price)
     end
 end
 
-local function autoUnlockAbility(abilityName)
+local function autoBuyAbility(abilityName)
     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyHaki", abilityName)
 end
 
-local function autoFarmLevel()
-    while true do
-        wait(2)
-        local quest = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AutoQuest")
+local function farmQuest()
+    while getgenv().farmQuestActive do
+        wait(1)
+        local currentLevel = player.Data.Level.Value
+        local quest = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", currentLevel)
         if quest then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AutoFarm", quest)
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BringNPC", quest)
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AutoAttack", quest)
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("FlyAndDamage", quest)
         end
     end
 end
 
--- Main Tab (Auto Farm Leveling)
-local mainTab = Window:NewTab("Main")
-local mainSection = mainTab:NewSection("Auto Farm Leveling")
+local function teleportToIsland(islandName)
+    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TeleportTo", islandName)
+end
 
-mainSection:NewToggle("Enable Auto Farm Leveling", "Farms level automatically from 0 to 2600", function(state)
+-- Main Tab (Farm Quest)
+local mainTab = Window:NewTab("Main")
+local mainSection = mainTab:NewSection("Farm Quest")
+
+mainSection:NewToggle("Enable Farm Quest", "Mengerjakan misi otomatis sesuai level dengan bring NPC, auto attack, dan terbang sambil menyerang.", function(state)
+    getgenv().farmQuestActive = state
     if state then
-        autoFarmLevel()
+        farmQuest()
     end
 end)
 
--- Auto Unlock Abilities
-local unlockTab = Window:NewTab("Auto Unlock")
-local unlockSection = unlockTab:NewSection("Abilities")
+-- Auto Buy Abilities
+local abilityTab = Window:NewTab("Auto Buy Ability")
+local abilitySection = abilityTab:NewSection("Abilities")
 
-unlockSection:NewButton("Unlock Flash Step", "Unlocks Flash Step ability", function()
-    autoUnlockAbility("Flash Step")
+abilitySection:NewToggle("Buy Aura (Buso Haki)", "Membeli Buso Haki secara otomatis.", function(state)
+    if state then autoBuyAbility("Buso Haki") end
 end)
-
-unlockSection:NewButton("Unlock Aura", "Unlocks Aura (Buso Haki)", function()
-    autoUnlockAbility("Buso Haki")
+abilitySection:NewToggle("Buy Flash Step", "Membeli Flash Step secara otomatis.", function(state)
+    if state then autoBuyAbility("Flash Step") end
 end)
-
-unlockSection:NewButton("Unlock Sky Jump", "Unlocks Sky Jump ability", function()
-    autoUnlockAbility("Sky Jump")
+abilitySection:NewToggle("Buy Sky Jump", "Membeli Sky Jump secara otomatis.", function(state)
+    if state then autoBuyAbility("Sky Jump") end
 end)
 
 -- Shop Section
@@ -70,68 +76,42 @@ local fightingSection = shopTab:NewSection("Fighting Styles")
 local accessoriesSection = shopTab:NewSection("Accessories")
 
 -- Swords (Sea 1)
-swordSection:NewButton("Buy Katana (1K Beli)", "Pirate Starter Island", function()
-    buyItem("Katana", 1000)
-end)
-swordSection:NewButton("Buy Cutlass (1K Beli)", "Pirate Starter Island", function()
-    buyItem("Cutlass", 1000)
-end)
-swordSection:NewButton("Buy Dual Katana (12K Beli)", "Pirate Village", function()
-    buyItem("Dual Katana", 12000)
-end)
-swordSection:NewButton("Buy Iron Mace (25K Beli)", "Pirate Village", function()
-    buyItem("Iron Mace", 25000)
-end)
-swordSection:NewButton("Buy Triple Katana (60K Beli)", "Frozen Village", function()
-    buyItem("Triple Katana", 60000)
-end)
-swordSection:NewButton("Buy Dual-Headed Blade (400K Beli)", "Upper Skylands", function()
-    buyItem("Dual-Headed Blade", 400000)
-end)
-swordSection:NewButton("Buy Bisento (1M Beli)", "Upper Skylands", function()
-    buyItem("Bisento", 1000000)
-end)
+swordSection:NewToggle("Buy Katana (1K Beli)", "Pirate Starter Island", function(state) if state then buyItem("Katana", 1000) end end)
+swordSection:NewToggle("Buy Cutlass (1K Beli)", "Pirate Starter Island", function(state) if state then buyItem("Cutlass", 1000) end end)
+swordSection:NewToggle("Buy Dual Katana (12K Beli)", "Pirate Village", function(state) if state then buyItem("Dual Katana", 12000) end end)
+swordSection:NewToggle("Buy Iron Mace (25K Beli)", "Pirate Village", function(state) if state then buyItem("Iron Mace", 25000) end end)
+swordSection:NewToggle("Buy Triple Katana (60K Beli)", "Frozen Village", function(state) if state then buyItem("Triple Katana", 60000) end end)
+swordSection:NewToggle("Buy Dual-Headed Blade (400K Beli)", "Upper Skylands", function(state) if state then buyItem("Dual-Headed Blade", 400000) end end)
+swordSection:NewToggle("Buy Bisento (1M Beli)", "Upper Skylands", function(state) if state then buyItem("Bisento", 1000000) end end)
 
 -- Guns (Sea 1)
-gunSection:NewButton("Buy Slingshot (5K Beli)", "Starter Island", function()
-    buyItem("Slingshot", 5000)
-end)
-gunSection:NewButton("Buy Flintlock (10K Beli)", "Middle Town", function()
-    buyItem("Flintlock", 10000)
-end)
-gunSection:NewButton("Buy Musket (25K Beli)", "Pirate Village", function()
-    buyItem("Musket", 25000)
-end)
-gunSection:NewButton("Buy Refined Slingshot (30K Beli)", "Marine Fortress", function()
-    buyItem("Refined Slingshot", 30000)
-end)
-gunSection:NewButton("Buy Refined Flintlock (50K Beli)", "Marine Fortress", function()
-    buyItem("Refined Flintlock", 50000)
-end)
-gunSection:NewButton("Buy Cannon (100K Beli)", "Marine Fortress", function()
-    buyItem("Cannon", 100000)
-end)
+gunSection:NewToggle("Buy Slingshot (5K Beli)", "Starter Island", function(state) if state then buyItem("Slingshot", 5000) end end)
+gunSection:NewToggle("Buy Flintlock (10K Beli)", "Middle Town", function(state) if state then buyItem("Flintlock", 10000) end end)
+gunSection:NewToggle("Buy Musket (25K Beli)", "Pirate Village", function(state) if state then buyItem("Musket", 25000) end end)
+gunSection:NewToggle("Buy Refined Slingshot (30K Beli)", "Marine Fortress", function(state) if state then buyItem("Refined Slingshot", 30000) end end)
+gunSection:NewToggle("Buy Refined Flintlock (50K Beli)", "Marine Fortress", function(state) if state then buyItem("Refined Flintlock", 50000) end end)
+gunSection:NewToggle("Buy Cannon (100K Beli)", "Marine Fortress", function(state) if state then buyItem("Cannon", 100000) end end)
 
 -- Fighting Styles (Sea 1)
-fightingSection:NewButton("Buy Dark Step (150K Beli)", "Pirate Village", function()
-    buyItem("Dark Step", 150000)
-end)
-fightingSection:NewButton("Buy Electric (500K Beli)", "Skylands", function()
-    buyItem("Electric", 500000)
-end)
-fightingSection:NewButton("Buy Water Kung Fu (750K Beli)", "Underwater City", function()
-    buyItem("Water Kung Fu", 750000)
-end)
+fightingSection:NewToggle("Buy Dark Step (150K Beli)", "Pirate Village", function(state) if state then buyItem("Dark Step", 150000) end end)
+fightingSection:NewToggle("Buy Electric (500K Beli)", "Skylands", function(state) if state then buyItem("Electric", 500000) end end)
+fightingSection:NewToggle("Buy Water Kung Fu (750K Beli)", "Underwater City", function(state) if state then buyItem("Water Kung Fu", 750000) end end)
 
 -- Accessories (Sea 1)
-accessoriesSection:NewButton("Buy Black Cape (50K Beli)", "Marine Fortress", function()
-    buyItem("Black Cape", 50000)
-end)
-accessoriesSection:NewButton("Buy Swordsman Hat (150K Beli)", "Desert", function()
-    buyItem("Swordsman Hat", 150000)
-end)
-accessoriesSection:NewButton("Buy Tomoe Ring (500K Beli)", "Frozen Village", function()
-    buyItem("Tomoe Ring", 500000)
-end)
+accessoriesSection:NewToggle("Buy Black Cape (50K Beli)", "Marine Fortress", function(state) if state then buyItem("Black Cape", 50000) end end)
+accessoriesSection:NewToggle("Buy Swordsman Hat (150K Beli)", "Desert", function(state) if state then buyItem("Swordsman Hat", 150000) end end)
+accessoriesSection:NewToggle("Buy Tomoe Ring (500K Beli)", "Frozen Village", function(state) if state then buyItem("Tomoe Ring", 500000) end end)
 
-print("[NANO HUB - Blox Fruits Sea 1 Script Loaded Successfully with Auto Farm Leveling]")
+-- Teleportation Section
+local teleportTab = Window:NewTab("Teleport")
+local teleportSection = teleportTab:NewSection("Islands - First Sea")
+
+local islands = {"Starter Island", "Pirate Village", "Middle Town", "Jungle", "Desert", "Frozen Village", "Marine Fortress", "Skylands", "Upper Skylands", "Underwater City"}
+
+for _, island in ipairs(islands) do
+    teleportSection:NewToggle("Teleport to " .. island, "Teleport otomatis ke " .. island, function(state)
+        if state then teleportToIsland(island) end
+    end)
+end
+
+print("[NANO HUB - Blox Fruits Sea 1 Script Updated Successfully with Toggle Features, Auto Buy Ability, Farm Quest, and Teleportation]")
